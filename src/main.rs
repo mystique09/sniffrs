@@ -15,7 +15,7 @@ fn main() {
         if err.contains("help") {
             process::exit(0);
         } else {
-            eprintln!("problem parsing arguments: {}", err);
+            eprintln!("Problem parsing arguments: {}", err);
             process::exit(0);
         }
     });
@@ -39,9 +39,14 @@ fn main() {
     }
     results.sort();
 
-    println!("");
+    if results.len() == 0 {
+        println!("No open ports found.");
+        process::exit(0);
+    }
+
+    println!();
     for v in results {
-        println!("port {} is open.", v);
+        println!("\u{001b}[36mPort {} is open.\u{001b}[0m", v);
     }
 }
 
@@ -49,13 +54,10 @@ fn sniff(tx: Sender<u16>, init_port: u16, ip: IpAddr, nt: u16) {
     let mut port = init_port + 1;
 
     loop {
-        match TcpStream::connect((ip, port)) {
-            Ok(_) => {
-                print!(".");
-                io::stdout().flush().unwrap();
-                tx.send(port).unwrap();
-            }
-            Err(_) => {}
+        if TcpStream::connect((ip, port)).is_ok() {
+            print!(".");
+            io::stdout().flush().unwrap();
+            tx.send(port).unwrap();
         }
 
         if (MAX_PORTS - port) <= nt {
