@@ -28,13 +28,17 @@ impl Argument {
         } else {
             if flag.contains("-h") || flag.contains("--help") && args.len() == 2 {
                 println!(
-                    "Usage: -h --help to display this message. \r\n -t to select how many threads."
+                    "Usage: -h, --help to display this message.\n\t-t to select how many threads."
                 );
                 return Err("help");
             } else if flag.contains("-h") || flag.contains("--help") {
                 return Err("Too many arguments.");
-            } else if flag.contains("-j") {
-                let ipaddr = match IpAddr::from_str(args.get(3).unwrap()) {
+            } else if flag.contains("-t") {
+                let ip = match args.get(3) {
+                    Some(ip) => ip,
+                    None => return Err("Missing IP_ADDRESS."),
+                };
+                let ipaddr = match IpAddr::from_str(ip) {
                     Ok(ip) => ip,
                     Err(_) => return Err("Invalid IP_ADDRESS, not an IPV6 or IPV4."),
                 };
@@ -51,7 +55,7 @@ impl Argument {
                 };
                 return Ok(arg);
             } else {
-                return Err("invalid input.");
+                Err("invalid input.")
             }
         }
     }
